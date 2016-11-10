@@ -36,6 +36,7 @@ public class PluginHubCore {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/searchAll/{search}")
 	public List<SearchData> searchPluginHub(@PathParam("search") String search) throws Exception {
+		search = "%" + search + "%";
 		return dao.search(search, search, search, search);
 	}
 
