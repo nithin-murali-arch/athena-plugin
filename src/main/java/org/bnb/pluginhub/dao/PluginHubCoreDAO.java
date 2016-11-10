@@ -3,7 +3,9 @@ package org.bnb.pluginhub.dao;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class PluginHubCoreDAO {
 	private static final String insertQuery = "INSERT INTO PLUGINS (pluginName, pluginDescription, fileName, version, downloadCount, isLatest, createdBy, createdDate) VALUES(?,?,?,0,0,1,?,?)";
 	private static final String decommission = "UPDATE PLUGINS SET isLatest=0 WHERE id=? AND isLatest=1";
 	private static final String updateQuery = "INSERT INTO PLUGINS (pluginName, pluginDescription, fileName, version, downloadCount, isLatest, createdBy, createdDate) VALUES(?,?,?,?,0,1,?,?)";
+	private static final String checkLogin = "SELECT * FROM USERS WHERE USERNAME = ? AND PASSWORD = ?";
 	private PluginHubCoreDAO(){
 		try {
 			System.out.println(jdbcString);
@@ -85,6 +88,7 @@ public class PluginHubCoreDAO {
 		stmt.setString(2, pluginDesc);
 		stmt.setString(3, fileName);
 		stmt.setString(4, createdBy);
+		stmt.setDate(5, new Date(new java.util.Date().getTime()));
 		stmt.execute();
 	}
 	
@@ -100,7 +104,20 @@ public class PluginHubCoreDAO {
 		stmt.setString(3, fileName);
 		stmt.setInt(4, data.getVersion() + 1);
 		stmt.setString(5, data.getCreatedBy());
+		stmt.setDate(6, new Date(new java.util.Date().getTime()));
 		stmt.execute();
+	}
+	
+	public boolean login(String userName, String password) throws SQLException{
+		PreparedStatement stmt = conn.prepareStatement(checkLogin);
+		stmt.setString(1, userName);
+		stmt.setString(2, password);
+		ResultSet rs = stmt.executeQuery();
+		rs.next();
+		if(rs.next()){
+			return true;
+		}
+		return false;
 	}
 	
 	private void runInitScripts() throws SQLException{
@@ -112,6 +129,8 @@ public class PluginHubCoreDAO {
 			Statement stmt = conn.createStatement();
 			stmt.execute("CREATE TABLE PLUGINS (id BIGINT auto_increment,pluginName VARCHAR2(50), pluginDesc VARCHAR2(500), fileName VARCHAR2(100), version INT, downloadCount BIGINT, isLatest INT, createdBy VARCHAR2(20), createdDate VARCHAR2(50)");
 			stmt.execute("CREATE TABLE USERS (USERNAME VARCHAR2(20) PRIMARY KEY, PASSWORD VARCHAR2(20)");
+			stmt.execute("INSERT INTO USERS (USERNAME, PASSWORD) SELECT 'admin', 'admin' WHERE NOT EXISTS (SELECT * From USERS WHERE USERNAME = 'admin')");
+			stmt.execute("INSERT INTO USERS (USERNAME, PASSWORD) SELECT 'sharath', 'sharath' WHERE NOT EXISTS (SELECT * From USERS WHERE USERNAME = 'sharath')");
 		}
 	}
 	

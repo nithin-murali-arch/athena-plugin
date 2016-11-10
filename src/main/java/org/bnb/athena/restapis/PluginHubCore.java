@@ -2,7 +2,9 @@ package org.bnb.athena.restapis;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +22,7 @@ import org.apache.commons.io.IOUtils;
 import org.bnb.pluginhub.dao.PluginHubCoreDAO;
 import org.bnb.pluginhub.pojos.SearchData;
 import org.bnb.pluginhub.pojos.User;
+import org.json.JSONObject;
 
 @Path("/pluginhub")
 public class PluginHubCore {
@@ -71,35 +74,47 @@ public class PluginHubCore {
 		dao.insert(0, data.getPluginName(), data.getPluginDescription(), data.getFileName(), createdBy);
 		return "Success!";
 	}
-	
+
 	@GET
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@Path("/download/{id}")
-	public void getFile(@PathParam("id") int id, @Context HttpServletResponse response) throws Exception{
+	public void getFile(@PathParam("id") int id, @Context HttpServletResponse response) throws Exception {
 		SearchData data = dao.fetch(id);
 		String fileLocation = System.getProperty("user.home") + "/" + data.getCreatedBy() + "/" + data.getFileName();
 		InputStream is = new FileInputStream(fileLocation);
-	      IOUtils.copy(is, response.getOutputStream());
-	      response.setContentType("application/octet-stream");
-	      response.flushBuffer();
+		IOUtils.copy(is, response.getOutputStream());
+		response.setContentType("application/octet-stream");
+		response.flushBuffer();
 	}
-	
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/login")
-	public User login(User user){
-		//TODO
-		return null;
+	public User login(User user) throws SQLException {
+		String username = org.bnb.pluginhub.utils.StringUtils.escape(user.getUsername(), true);
+		String password = org.bnb.pluginhub.utils.StringUtils.escape(user.getPassword(), true);
+		Pattern pattern = Pattern.compile("^[a-zA-Z0-9_]*$");
+		user = new User();
+		if (username != null && password != null && pattern.matcher(username).matches()
+				&& pattern.matcher(password).matches()) {
+			
+			user.setLoggedin(dao.login(username, password));
+			user.setMessage(user.isLoggedin() ? "Logged in." : "Username/Password combination does not exist");
+		} else {
+			user.setLoggedin(false);
+			user.setMessage("Username/Password combination does not exist");
+		}
+		return user;
 	}
-	
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/register")
-	public User register(User user){
-		//TODO
+	public User register(User user) {
+		// TODO
 		return null;
 	}
-	
+
 }
