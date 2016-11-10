@@ -1,13 +1,12 @@
 package org.bnb.pluginhub.dao;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -18,16 +17,11 @@ import org.bnb.pluginhub.utils.ResultsetJsonConverter;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.h2.jdbcx.JdbcDataSource;
-import org.h2.tools.Backup;
-import org.h2.tools.Restore;
 import org.json.JSONArray;
 import org.json.JSONException;
 
 public class PluginHubCoreDAO {
 	Logger logger = Logger.getLogger("PluginHubCoreDAO");
-	private static final String jdbcString = "jdbc:h2:~/pluginHub";
-	private static final String baseDir = System.getProperty("user.home");
 	private static Connection conn;
 	ObjectMapper mapper = new ObjectMapper();
 	private static PluginHubCoreDAO dao = null;
@@ -35,15 +29,10 @@ public class PluginHubCoreDAO {
 	private static final String fetchPlugin = "SELECT * FROM PLUGINS WHERE id = ? AND isLatest=1";
 	private static final String insertQuery = "INSERT INTO PLUGINS (pluginName, pluginDescription, fileName, version, downloadCount, isLatest, createdBy, createdDate) VALUES(?,?,?,0,0,1,?,?)";
 	private static final String decommission = "UPDATE PLUGINS SET isLatest=0 WHERE id=? AND isLatest=1";
-	private static final String updateQuery = "INSERT INTO PLUGINS (pluginName, pluginDescription, fileName, version, downloadCount, isLatest, createdBy, createdDate) VALUES(?,?,?,?,0,1,?,?)";
 	private static final String checkLogin = "SELECT * FROM USERS WHERE USERNAME = ? AND PASSWORD = ?";
 	private PluginHubCoreDAO(){
 		try {
-			System.out.println(jdbcString);
-			JdbcDataSource ds = new JdbcDataSource();
-			ds.setURL(jdbcString);
-			conn = ds.getConnection();
-			runInitScripts();
+			conn = DriverManager.getConnection("jdbc:mariadb://athenac.c9aoljys3p0u.us-west-2.rds.amazonaws.com:3306/athenac", "athenac", "athenac12");
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, e.getMessage(), e);
 			e.printStackTrace();
@@ -118,23 +107,5 @@ public class PluginHubCoreDAO {
 			return true;
 		}
 		return false;
-	}
-	
-	private void runInitScripts() throws SQLException{
-		File backupFile = new File(baseDir + "/backup.zip");
-		if(backupFile.exists()){
-			Restore.execute(baseDir + "/backup.zip", baseDir, "pluginHub");
-		}
-		else{
-			Statement stmt = conn.createStatement();
-			stmt.execute("CREATE TABLE PLUGINS (id BIGINT auto_increment,pluginName VARCHAR2(50), pluginDesc VARCHAR2(500), fileName VARCHAR2(100), version INT, downloadCount BIGINT, isLatest INT, createdBy VARCHAR2(20), createdDate VARCHAR2(50)");
-			stmt.execute("CREATE TABLE USERS (USERNAME VARCHAR2(20) PRIMARY KEY, PASSWORD VARCHAR2(20)");
-			stmt.execute("INSERT INTO USERS (USERNAME, PASSWORD) SELECT 'admin', 'admin' WHERE NOT EXISTS (SELECT * From USERS WHERE USERNAME = 'admin')");
-			stmt.execute("INSERT INTO USERS (USERNAME, PASSWORD) SELECT 'sharath', 'sharath' WHERE NOT EXISTS (SELECT * From USERS WHERE USERNAME = 'sharath')");
-		}
-	}
-	
-	public static void backupData() throws SQLException{
-		Backup.execute(baseDir + "/backup.zip", baseDir, "pluginHub", true);
 	}
 }
