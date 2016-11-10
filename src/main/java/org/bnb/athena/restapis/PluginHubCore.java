@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,12 +21,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
-import org.bnb.athena.pojos.SearchData;
 import org.bnb.pluginhub.dao.PluginHubCoreDAO;
+import org.bnb.pluginhub.pojos.SearchData;
 import org.bnb.pluginhub.pojos.User;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.json.JSONException;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
@@ -79,35 +75,6 @@ public class PluginHubCore {
 		}
 		dao.update(data.getId(), data.getPluginDescription(), data.getFileName(), data.getVersion());
 		dao.insert(0, data.getPluginName(), data.getPluginDescription(), data.getFileName(), createdBy);
-		return "Success!";
-	}
-
-	@POST
-	@Produces(MediaType.TEXT_PLAIN)
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	@Path("/upload")
-	public String upload(@FormParam("file") InputStream uploadedInputStream,
-			@FormParam("file") FormDataContentDisposition fileDetail, @Context HttpServletRequest request) {
-		HttpSession session = request.getSession();
-		String createdBy = (String) session.getAttribute("username");
-		if (createdBy != null) {
-			String fileLocation = System.getProperty("user.home") + "/" + createdBy + "/" + fileDetail.getFileName();
-			try {
-				FileOutputStream out = new FileOutputStream(new File(fileLocation));
-				int read = 0;
-				byte[] bytes = new byte[1024];
-				out = new FileOutputStream(new File(fileLocation));
-				while ((read = uploadedInputStream.read(bytes)) != -1) {
-					out.write(bytes, 0, read);
-				}
-				out.flush();
-				out.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			return "Please login before you do that!";
-		}
 		return "Success!";
 	}
 	

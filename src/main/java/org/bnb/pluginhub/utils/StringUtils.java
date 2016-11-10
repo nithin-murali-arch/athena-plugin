@@ -1,4 +1,4 @@
-package org.bnb.athena.utils;
+package org.bnb.pluginhub.utils;
 
 import java.util.Random;
 

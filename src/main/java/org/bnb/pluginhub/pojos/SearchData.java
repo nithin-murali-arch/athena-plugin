@@ -1,4 +1,4 @@
-package org.bnb.athena.pojos;
+package org.bnb.pluginhub.pojos;
 
 public class SearchData {
 	private int id;

@@ -1,4 +1,4 @@
-package org.bnb.athena.utils;
+package org.bnb.pluginhub.utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

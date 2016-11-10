@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bnb.athena.pojos.SearchData;
-import org.bnb.athena.utils.ResultsetJsonConverter;
+import org.bnb.pluginhub.pojos.SearchData;
+import org.bnb.pluginhub.utils.ResultsetJsonConverter;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;

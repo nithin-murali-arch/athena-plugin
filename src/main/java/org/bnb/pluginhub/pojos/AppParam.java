@@ -1,4 +1,4 @@
-package org.bnb.athena.pojos;
+package org.bnb.pluginhub.pojos;
 
 public class AppParam {
 	private String key;
