@@ -3,7 +3,7 @@ package org.bnb.pluginhub.pojos;
 public class SearchData {
 	private int id;
 	private String pluginName;
-	private String pluginDescription;
+	private String pluginDesc;
 	private String fileName;
 	private int version;
 	private int downloadCount;
@@ -21,12 +21,6 @@ public class SearchData {
 	}
 	public void setPluginName(String pluginName) {
 		this.pluginName = pluginName;
-	}
-	public String getPluginDescription() {
-		return pluginDescription;
-	}
-	public void setPluginDescription(String pluginDescription) {
-		this.pluginDescription = pluginDescription;
 	}
 	public String getFileName() {
 		return fileName;
@@ -63,6 +57,12 @@ public class SearchData {
 	}
 	public void setCreatedDate(String createdDate) {
 		this.createdDate = createdDate;
+	}
+	public String getPluginDesc() {
+		return pluginDesc;
+	}
+	public void setPluginDesc(String pluginDesc) {
+		this.pluginDesc = pluginDesc;
 	}
 	
 }

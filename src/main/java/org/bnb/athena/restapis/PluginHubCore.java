@@ -57,7 +57,7 @@ public class PluginHubCore {
 		if (createdBy != null && !createdBy.equals(data.getCreatedBy())) {
 			return "Don't try to mess with us. We have a smart architect ;)";
 		}
-		dao.insert(0, data.getPluginName(), data.getPluginDescription(), data.getFileName(), createdBy);
+		dao.insert(0, data.getPluginName(), data.getPluginDesc(), data.getFileName(), createdBy);
 		return "Success!";
 	}
 
@@ -71,8 +71,8 @@ public class PluginHubCore {
 		if (createdBy != null && !createdBy.equals(data.getCreatedBy())) {
 			return "Don't try to mess with us. We have a smart architect ;)";
 		}
-		dao.update(data.getId(), data.getPluginDescription(), data.getFileName(), data.getVersion());
-		dao.insert(0, data.getPluginName(), data.getPluginDescription(), data.getFileName(), createdBy);
+		dao.update(data.getId(), data.getPluginDesc(), data.getFileName(), data.getVersion());
+		dao.insert(0, data.getPluginName(), data.getPluginDesc(), data.getFileName(), createdBy);
 		return "Success!";
 	}
 
@@ -92,7 +92,8 @@ public class PluginHubCore {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/login")
-	public User login(User user) throws SQLException {
+	public User login(User user, @Context HttpServletRequest request) throws SQLException {
+		HttpSession session = request.getSession();
 		String username = org.bnb.pluginhub.utils.StringUtils.escape(user.getUsername(), true);
 		String password = org.bnb.pluginhub.utils.StringUtils.escape(user.getPassword(), true);
 		Pattern pattern = Pattern.compile("^[a-zA-Z0-9_]*$");
@@ -101,6 +102,9 @@ public class PluginHubCore {
 				&& pattern.matcher(password).matches()) {
 			
 			user.setLoggedin(dao.login(username, password));
+			if(user.isLoggedin()){
+				session.setAttribute("username", username);
+			}
 			user.setMessage(user.isLoggedin() ? "Logged in." : "Username/Password combination does not exist");
 		} else {
 			user.setLoggedin(false);

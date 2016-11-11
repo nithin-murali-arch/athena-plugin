@@ -25,15 +25,15 @@ public class PluginHubCoreDAO {
 	private static Connection conn;
 	ObjectMapper mapper = new ObjectMapper();
 	private static PluginHubCoreDAO dao = null;
-	private static final String fullSearchQuery = "SELECT * FROM PLUGINS WHERE pluginName LIKE ? OR pluginDesc LIKE ? OR pluginFileName LIKE ? OR createdBy LIKE ? AND isLatest=1";
+	private static final String fullSearchQuery = "SELECT * FROM PLUGINS WHERE pluginName LIKE ? OR pluginDesc LIKE ? OR fileName LIKE ? OR createdBy LIKE ? AND isLatest=1";
 	private static final String fetchPlugin = "SELECT * FROM PLUGINS WHERE id = ? AND isLatest=1";
-	private static final String insertQuery = "INSERT INTO PLUGINS (pluginName, pluginDescription, fileName, version, downloadCount, isLatest, createdBy, createdDate) VALUES(?,?,?,0,0,1,?,?)";
+	private static final String insertQuery = "INSERT INTO PLUGINS (pluginName, pluginDesc, fileName, version, downloadCount, isLatest, createdBy, createdDate) VALUES(?,?,?,0,0,1,?,?)";
 	private static final String decommission = "UPDATE PLUGINS SET isLatest=0 WHERE id=? AND isLatest=1";
 	private static final String checkLogin = "SELECT * FROM USERS WHERE USERNAME = ? AND PASSWORD = ?";
 	private PluginHubCoreDAO(){
 		try {
 			Class.forName("org.mariadb.jdbc.Driver");
-			conn = DriverManager.getConnection("jdbc:mariadb://athenac.c9aoljys3p0u.us-west-2.rds.amazonaws.com:3306/athenac", "athenac", "athenac12");
+			conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/athena", "root", "");
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, e.getMessage(), e);
 			e.printStackTrace();
@@ -106,7 +106,6 @@ public class PluginHubCoreDAO {
 		stmt.setString(1, userName);
 		stmt.setString(2, password);
 		ResultSet rs = stmt.executeQuery();
-		rs.next();
 		if(rs.next()){
 			return true;
 		}

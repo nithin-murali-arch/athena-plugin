@@ -16,6 +16,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.bnb.pluginhub.dao.PluginHubCoreDAO;
+import org.bnb.pluginhub.pojos.SearchData;
 import org.json.JSONObject;
 
 @MultipartConfig
@@ -30,7 +32,7 @@ public class PluginHubUpload extends HttpServlet {
 		String createdBy = (String) session.getAttribute("username");
 
 		JSONObject json = new JSONObject();
-		if (session.getAttribute("userName") == null) {
+		if (session.getAttribute("username") == null) {
 			json.put("error", "Error: You must log in first!");
 			writer.println(json.toString());
 			writer.flush();
@@ -49,7 +51,7 @@ public class PluginHubUpload extends HttpServlet {
 		upload.setFileSizeMax(1024 * 1024 * 300); // 300MB
 		upload.setSizeMax(1024 * 1024 * 300); // 300MB
 		String fileName = "";
-		String uploadPath = System.getProperty("user.home") + "/pluginhub/" + createdBy + "/";
+		String uploadPath = System.getProperty("user.home") + "/" + createdBy + "/";
 		File uploadDir = new File(uploadPath);
 		if (!uploadDir.exists()) {
 			uploadDir.mkdir();
@@ -67,6 +69,9 @@ public class PluginHubUpload extends HttpServlet {
 					}
 				}
 			}
+			PluginHubCoreDAO dao = PluginHubCoreDAO.getInstance();
+			SearchData data = dao.search(fileName, fileName, fileName, fileName).get(0);
+			writer.print(new JSONObject().put("id", data.getId()));
 		} catch (Exception ex) {
 			request.setAttribute("message", "There was an error: " + ex.getMessage());
 		}
